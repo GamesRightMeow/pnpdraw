@@ -64,6 +64,7 @@
         let clickY = [];
         let clickDrag = [];
         let paint = false;
+        let pan = false;
         let panOffset = { x: 0, y: 0 };
         let lastPanPos = { x: 0, y: 0 };
         let scale = 1;
@@ -141,11 +142,18 @@
         }
 
         function mouseDownEventHandler(e) {
-          paint = true;
           let x = e.pageX - canvas.offsetLeft;
           let y = e.pageY - canvas.offsetTop;
-          addClick(x - panOffset.x, y - panOffset.y, false);
-          drawNew();
+
+          if (e.buttons == 1) {
+            paint = true;
+            addClick(x - panOffset.x, y - panOffset.y, false);
+            drawNew();
+          } else if (e.buttons == 2) {
+            pan = true;
+            lastPanPos.x = x;
+            lastPanPos.y = y;
+          }
         }
 
         function touchstartEventHandler(e) {
@@ -170,19 +178,42 @@
         function mouseUpEventHandler(e) {
           context.closePath();
           paint = false;
+          pan = false;
         }
 
         function mouseMoveEventHandler(e) {
           let x = e.pageX - canvas.offsetLeft;
           let y = e.pageY - canvas.offsetTop;
+          
           if (paint) {
             addClick(x - panOffset.x, y - panOffset.y, true);
             drawNew();
           }
+
+          if (pan) {
+            let dx = x - lastPanPos.x;
+            let dy = y - lastPanPos.y;
+            let sens = (1.0 - scale) * 4;
+            panOffset.x += dx * (1 + sens);
+            panOffset.y += dy * (1 + sens);
+            lastPanPos.x = x;
+            lastPanPos.y = y;
+            redraw();
+          }
+        }
+
+        function mouseWheelHandler(e) {
+          let dir = Math.sign(e.wheelDelta);
+          scale = Math.min(1, Math.max(0.01, scale + dir * 0.01));
+          redraw();
+        }
+
+        function mouseLeaveHandler(e) {
+          paint = false;
+          pan = false;
         }
 
         function touchMoveEventHandler(e) {
-          
           let x1 = e.touches[0].pageX - canvas.offsetLeft;
           let y1 = e.touches[0].pageY - canvas.offsetTop;
           if (e.touches.length == 1) {
@@ -213,7 +244,7 @@
             }
             debug.innerText = ds;
 
-            redraw()
+            redraw();
           }
         }
 
@@ -223,6 +254,10 @@
             canvas.addEventListener('mouseup', mouseUpEventHandler);
             canvas.addEventListener('mousemove', mouseMoveEventHandler);
             canvas.addEventListener('mousedown', mouseDownEventHandler);
+            canvas.addEventListener('mouseleave', mouseLeaveHandler);
+            canvas.addEventListener('wheel', mouseWheelHandler);
+            // disable opening context menu
+            canvas.addEventListener('contextmenu', (e) => e.preventDefault());
             mouseDownEventHandler(detectEvent);
           } else {
             canvas.addEventListener('touchstart', touchstartEventHandler);
