@@ -100,43 +100,22 @@
 
           context.strokeStyle = "#000000";
           for (let i = 0; i < clickX.length; i += 1) {
-            if (!clickDrag[i] && i == 0) {
-              context.beginPath();
-              context.moveTo(clickX[i], clickY[i]);
-              context.stroke();
-            } else if (!clickDrag[i] && i > 0) {
-              context.closePath();
-
-              context.beginPath();
-              context.moveTo(clickX[i], clickY[i]);
-              context.stroke();
-            } else {
-              context.lineTo(clickX[i], clickY[i]);
-              context.stroke();
-            }
+            drawClick(i);
           }
         }
 
-        /**
-         * Draw the newly added point.
-         * @return {void}
-         */
-        function drawNew() {
-          let i = clickX.length - 1
-          if (!clickDrag[i]) {
-            if (clickX.length == 0) {
-              context.beginPath();
-              context.moveTo(clickX[i], clickY[i]);
-              context.stroke();
-            } else {
-              context.closePath();
-
-              context.beginPath();
-              context.moveTo(clickX[i], clickY[i]);
-              context.stroke();
-            }
+        function drawClick(index) {
+          if (!clickDrag[index] && index == 0) {
+            context.beginPath();
+            context.moveTo(clickX[index], clickY[index]);
+            context.stroke();
+          } else if (!clickDrag[index] && index > 0) {
+            context.closePath();
+            context.beginPath();
+            context.moveTo(clickX[index], clickY[index]);
+            context.stroke();
           } else {
-            context.lineTo(clickX[i], clickY[i]);
+            context.lineTo(clickX[index], clickY[index]);
             context.stroke();
           }
         }
@@ -148,7 +127,7 @@
           if (e.buttons == 1) {
             paint = true;
             addClick(x - panOffset.x, y - panOffset.y, false);
-            drawNew();
+            drawClick(clickX.length - 1);
           } else if (e.buttons == 2) {
             pan = true;
             lastPanPos.x = x;
@@ -172,7 +151,7 @@
           }
 
           addClick(x1 - panOffset.x, y1 - panOffset.y, false);
-          drawNew();
+          drawClick(clickX.length - 1);
         }
 
         function mouseUpEventHandler(e) {
@@ -187,7 +166,7 @@
           
           if (paint) {
             addClick(x - panOffset.x, y - panOffset.y, true);
-            drawNew();
+            drawClick(clickX.length - 1);
           }
 
           if (pan) {
@@ -219,7 +198,7 @@
           if (e.touches.length == 1) {
             if (paint) {
               addClick(x1 - panOffset.x, y1 - panOffset.y, true);
-              drawNew();
+              drawClick(clickX.length - 1);
             }
           } else {
             let x2 = e.touches[1].pageX - canvas.offsetLeft;
@@ -248,36 +227,31 @@
           }
         }
 
-        function setUpHandler(isMouseandNotTouch, detectEvent) {
-          removeRaceHandlers();
-          if (isMouseandNotTouch) {
-            canvas.addEventListener('mouseup', mouseUpEventHandler);
-            canvas.addEventListener('mousemove', mouseMoveEventHandler);
-            canvas.addEventListener('mousedown', mouseDownEventHandler);
-            canvas.addEventListener('mouseleave', mouseLeaveHandler);
-            canvas.addEventListener('wheel', mouseWheelHandler);
-            // disable opening context menu
-            canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-            mouseDownEventHandler(detectEvent);
-          } else {
-            canvas.addEventListener('touchstart', touchstartEventHandler);
-            canvas.addEventListener('touchmove', touchMoveEventHandler);
-            canvas.addEventListener('touchend', mouseUpEventHandler);
-            touchstartEventHandler(detectEvent);
-          }
-        }
-
         function mouseWins(e) {
-          setUpHandler(true, e);
+          canvas.removeEventListener('mousedown', mouseWins);
+          canvas.removeEventListener('touchstart', touchWins);
+
+          canvas.addEventListener('mouseup', mouseUpEventHandler);
+          canvas.addEventListener('mousemove', mouseMoveEventHandler);
+          canvas.addEventListener('mousedown', mouseDownEventHandler);
+          canvas.addEventListener('mouseleave', mouseLeaveHandler);
+          canvas.addEventListener('wheel', mouseWheelHandler);
+
+          // disable opening context menu
+          canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+          mouseDownEventHandler(e);
         }
 
         function touchWins(e) {
-          setUpHandler(false, e);
-        }
-
-        function removeRaceHandlers() {
           canvas.removeEventListener('mousedown', mouseWins);
           canvas.removeEventListener('touchstart', touchWins);
+
+          canvas.addEventListener('touchstart', touchstartEventHandler);
+          canvas.addEventListener('touchmove', touchMoveEventHandler);
+          canvas.addEventListener('touchend', mouseUpEventHandler);
+
+          touchstartEventHandler(e);
         }
 
         canvas.addEventListener('mousedown', mouseWins);
