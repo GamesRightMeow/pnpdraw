@@ -25,22 +25,55 @@
       #toolbar {
         display: flex;
       }
+      #userImage {
+        display: none;
+      }
+      .nav-button {
+        width: 50px;
+        height: 50px;
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <div class="toolbar">
-        <input id="userImage" type="file">
-        <button id="drawButton">Draw</button>
-        <button id="eraseButton">Erase</button>
+        <input id="userImage" class="nav-button" type="file">  
+        <button class="nav-button" onclick="document.getElementById('userImage').click();">File</button>
+        <button id="drawButton" class="nav-button">Draw</button>
+        <button id="eraseButton" class="nav-button">Erase</button>
+        <input type="range" id="zoom" min="10" max="100">
+        <input type="range" id="size" min="0" max="100">
         <div id="debug">1</div>
       </div>
 
       <canvas id="sheet"></canvas>
 
       <script type='text/javascript'>
+        let paint = false;
+        let pan = false;
+        let panOffset = { x: 0, y: 0 };
+        let lastPanPos = { x: 0, y: 0 };
+        let scale = 1;
+        let lastScaleDis = 0;
+        let pinchMode = false;
+        let pinchStart = 0;
+        let pinchModeAccum = 0;
+
         let debug = document.getElementById('debug');
         debug.innerText = "TEST";
+
+        let zoomSlider = document.getElementById("zoom");
+        zoomSlider.value = 100;
+        zoomSlider.addEventListener("input", (e) => { 
+          scale = zoomSlider.value / 100;
+          redraw();
+        });
+
+        let sizeSlider = document.getElementById("size");
+        sizeSlider.value = 20;
+        sizeSlider.addEventListener("input", (e) => { 
+          drawContext.lineWidth = (sizeSlider.value / 100) * 48 + 2;
+        });
 
         let mainCanvas = document.getElementById('sheet');
         mainCanvas.width = document.body.clientWidth
@@ -61,17 +94,8 @@
           userImg.src = URL.createObjectURL(e.target.files[0]);
         };
         
-        mainContext.lineJoin = "round";
-        mainContext.lineWidth = 2;
-
-        let paint = false;
-        let pan = false;
-        let panOffset = { x: 0, y: 0 };
-        let lastPanPos = { x: 0, y: 0 };
-        let scale = 1;
-        let lastScaleDis = 0;
-        let pinchMode = false;
-        let lastChangeTime = Date.now();
+        drawContext.lineJoin = "round";
+        drawContext.lineWidth = 2;
 
         /**
          * Redraw the complete canvas.
@@ -89,22 +113,6 @@
 
           mainContext.drawImage(userImg, 0, 0);
           mainContext.drawImage(drawCanvas, 0, 0)
-        }
-
-        function drawClick(x, y, drag) {
-          if (!drag && index == 0) {
-            drawContext.beginPath();
-            drawContext.moveTo(x, y);
-            drawContext.stroke();
-          } else if (!drag && index > 0) {
-            drawContext.closePath();
-            drawContext.beginPath();
-            drawContext.moveTo(x, y);
-            drawContext.stroke();
-          } else {
-            drawContext.lineTo(x, y);
-            drawContext.stroke();
-          }
         }
 
         function mouseDownEventHandler(e) {
@@ -127,6 +135,9 @@
         function touchstartEventHandler(e) {
           paint = true;
           pinchMode = 0;
+          pinchModeAccum = 0;
+          pinchStart = Date.now();
+
           let x1 = e.touches[0].pageX - mainCanvas.offsetLeft;
           let y1 = e.touches[0].pageY - mainCanvas.offsetTop;
 
@@ -197,27 +208,14 @@
             let midY = (y1 + y2)/2;
             let panDis = Math.hypot(midX - lastPanPos.x, midY - lastPanPos.y);
 
-            let scaleDis = Math.hypot(x2 - x1, y2 - y1);
-            let deltaScaleDis = scaleDis - lastScaleDis;
+            let dx = midX - lastPanPos.x
+            let dy = midY - lastPanPos.y
+            let sens = (1.0 - scale) * 4;
+            panOffset.x += dx * (1 + sens);
+            panOffset.y += dy * (1 + sens);
 
-            // act on mode
-            if (pinchMode == 0) {
-
-            } else if (pinchMode == 1) {
-              // pan
-              let dx = midX - lastPanPos.x
-              let dy = midY - lastPanPos.y
-              let sens = (1.0 - scale) * 4;
-              panOffset.x += dx * (1 + sens);
-              panOffset.y += dy * (1 + sens);
-            } else if (pinchMode == 2) {
-              // zoom
-              scale = Math.min(1, Math.max(0.01, scale + (deltaScaleDis * 0.0025)));
-            }
-
-            lastScaleDis = scaleDis;
-            lastPanPos.x = x1;
-            lastPanPos.y = y1;
+            lastPanPos.x = midX;
+            lastPanPos.y = midY;
 
             redraw();
           }
