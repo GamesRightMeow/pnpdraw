@@ -80,7 +80,7 @@
         mainCanvas.height = document.body.clientHeight
         let mainContext = mainCanvas.getContext("2d");
         
-        var drawCanvas = document.createElement('canvas');
+        let drawCanvas = document.createElement('canvas');
         drawCanvas.width = mainCanvas.width;
         drawCanvas.height = mainCanvas.height;
         let drawContext = drawCanvas.getContext("2d");
@@ -89,6 +89,11 @@
         let imageInput = document.getElementById('userImage');
         imageInput.onchange = (e) => {
           userImg.onload = function() {
+            // FIXME: how to scale line drawing correctly?
+            drawCanvas = document.createElement('canvas');
+            drawCanvas.width = userImg.width;
+            drawCanvas.height = userImg.height;
+            drawContext = drawCanvas.getContext("2d");
             redraw()
           }
           userImg.src = URL.createObjectURL(e.target.files[0]);
@@ -113,6 +118,9 @@
 
           mainContext.drawImage(userImg, 0, 0);
           mainContext.drawImage(drawCanvas, 0, 0)
+
+          drawContext.setTransform(1, 0, 0, 1, 0, 0);
+          drawContext.translate(-panOffset.x, -panOffset.y);
         }
 
         function mouseDownEventHandler(e) {
