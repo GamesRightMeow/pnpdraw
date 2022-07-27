@@ -43,7 +43,6 @@
         <button id="erase-button" class="nav-button">Erase</button>
         <input type="range" id="zoom" min="10" max="100">
         <input type="range" id="size" min="0" max="100">
-        <div id="debug">1</div>
       </div>
 
       <canvas id="sheet"></canvas>
@@ -58,9 +57,6 @@
         let pinchMode = false;
         let pinchStart = 0;
         let pinchModeAccum = 0;
-
-        let debug = document.getElementById('debug');
-        debug.innerText = "TEST";
 
         let drawButton = document.getElementById('draw-button');
         drawButton.addEventListener("click", (e) => { 
@@ -101,7 +97,6 @@
         let imageInput = document.getElementById('userImage');
         imageInput.onchange = (e) => {
           userImg.onload = function() {
-            // FIXME: how to scale line drawing correctly?
             drawCanvas = document.createElement('canvas');
             drawCanvas.width = userImg.width;
             drawCanvas.height = userImg.height;
@@ -128,8 +123,10 @@
           mainContext.scale(scale, scale);
           mainContext.translate(panOffset.x, panOffset.y);
 
-          mainContext.drawImage(userImg, 0, 0);
-          mainContext.drawImage(drawCanvas, 0, 0)
+          let x = (mainCanvas.width / scale - drawCanvas.width) / 2;
+          let y = (mainCanvas.height / scale - drawCanvas.height) / 2;
+          mainContext.drawImage(userImg, x, y);
+          mainContext.drawImage(drawCanvas, x, y);
 
           drawContext.setTransform(1, 0, 0, 1, 0, 0);
           drawContext.translate(-panOffset.x, -panOffset.y);
@@ -141,8 +138,10 @@
 
           if (e.buttons == 1) {
             paint = true;
+            let lx = (x / scale) - ((mainCanvas.width / scale - drawCanvas.width) / 2);
+            let ly = (y / scale) - ((mainCanvas.height / scale - drawCanvas.height) / 2);
             drawContext.beginPath();
-            drawContext.moveTo(x / scale, y / scale);
+            drawContext.moveTo(lx, ly);
             drawContext.stroke();
             redraw();
           } else if (e.buttons == 2) {
@@ -170,8 +169,10 @@
             lastPanPos.y = midY;
             lastScaleDis = Math.hypot(x2 - x1, y2 - y1);
           } else {
+            let lx = (x1 / scale) - ((mainCanvas.width / scale - drawCanvas.width) / 2);
+            let ly = (y1 / scale) - ((mainCanvas.height / scale - drawCanvas.height) / 2);
             drawContext.beginPath();
-            drawContext.moveTo(x1 / scale, y1 / scale);
+            drawContext.moveTo(lx, ly);
             drawContext.stroke();
             redraw();
           }
@@ -194,7 +195,9 @@
           let y = e.pageY - mainCanvas.offsetTop;
           
           if (paint) {
-            drawContext.lineTo(x / scale, y / scale);
+            let lx = (x / scale) - ((mainCanvas.width / scale - drawCanvas.width) / 2);
+            let ly = (y / scale) - ((mainCanvas.height / scale - drawCanvas.height) / 2);
+            drawContext.lineTo(lx, ly);
             drawContext.stroke();
             redraw();
           }
@@ -216,7 +219,9 @@
           let y1 = e.touches[0].pageY - mainCanvas.offsetTop;
           if (e.touches.length == 1) {
             if (paint) {
-              drawContext.lineTo(x1 / scale, y1 / scale);
+              let lx = (x1 / scale) - ((mainCanvas.width / scale - drawCanvas.width) / 2);
+              let ly = (y1 / scale) - ((mainCanvas.height / scale - drawCanvas.height) / 2);
+              drawContext.lineTo(lx, ly);
               drawContext.stroke();
               redraw();
             }
