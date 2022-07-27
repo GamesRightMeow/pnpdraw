@@ -39,8 +39,8 @@
       <div class="toolbar">
         <input id="userImage" class="nav-button" type="file">  
         <button class="nav-button" onclick="document.getElementById('userImage').click();">File</button>
-        <button id="drawButton" class="nav-button">Draw</button>
-        <button id="eraseButton" class="nav-button">Erase</button>
+        <button id="draw-button" class="nav-button">Draw</button>
+        <button id="erase-button" class="nav-button">Erase</button>
         <input type="range" id="zoom" min="10" max="100">
         <input type="range" id="size" min="0" max="100">
         <div id="debug">1</div>
@@ -61,6 +61,18 @@
 
         let debug = document.getElementById('debug');
         debug.innerText = "TEST";
+
+        let drawButton = document.getElementById('draw-button');
+        drawButton.addEventListener("click", (e) => { 
+          drawContext.strokeStyle = "rgba(0, 0, 0, 1)";
+          drawContext.globalCompositeOperation='source-over';
+        });
+
+        let eraseButton = document.getElementById('erase-button');
+        eraseButton.addEventListener("click", (e) => { 
+          drawContext.strokeStyle = "rgba(0, 0, 0, 0)";
+          drawContext.globalCompositeOperation='destination-out';
+        });
 
         let zoomSlider = document.getElementById("zoom");
         zoomSlider.value = 100;
@@ -99,8 +111,11 @@
           userImg.src = URL.createObjectURL(e.target.files[0]);
         };
         
+        mainContext.fillStyle = "#ffffff";
+
         drawContext.lineJoin = "round";
         drawContext.lineWidth = 2;
+        drawContext.strokeStyle = "rgba(0, 0, 0, 1)";
 
         /**
          * Redraw the complete canvas.
@@ -109,9 +124,6 @@
           mainContext.setTransform(1, 0, 0, 1, 0, 0);
 
           mainContext.fillRect(0, 0, mainCanvas.width, mainCanvas.height);
-          
-          mainContext.fillStyle = "#FF0000";
-          mainContext.strokeStyle = "#000000";
 
           mainContext.scale(scale, scale);
           mainContext.translate(panOffset.x, panOffset.y);
