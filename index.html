@@ -130,7 +130,7 @@
           if (e.buttons == 1) {
             paint = true;
             drawContext.beginPath();
-            drawContext.moveTo(x, y);
+            drawContext.moveTo(x / scale, y / scale);
             drawContext.stroke();
             redraw();
           } else if (e.buttons == 2) {
@@ -159,7 +159,7 @@
             lastScaleDis = Math.hypot(x2 - x1, y2 - y1);
           } else {
             drawContext.beginPath();
-            drawContext.moveTo(x1, y1);
+            drawContext.moveTo(x1 / scale, y1 / scale);
             drawContext.stroke();
             redraw();
           }
@@ -182,7 +182,7 @@
           let y = e.pageY - mainCanvas.offsetTop;
           
           if (paint) {
-            drawContext.lineTo(x, y);
+            drawContext.lineTo(x / scale, y / scale);
             drawContext.stroke();
             redraw();
           }
@@ -204,7 +204,7 @@
           let y1 = e.touches[0].pageY - mainCanvas.offsetTop;
           if (e.touches.length == 1) {
             if (paint) {
-              drawContext.lineTo(x1, y1);
+              drawContext.lineTo(x1 / scale, y1 / scale);
               drawContext.stroke();
               redraw();
             }
