@@ -286,6 +286,12 @@ function touchWins(e) {
   touchstartEventHandler(e);
 }
 
+function windowResizeHandler(e) {
+  rebuildMainCanvas();
+  redraw();
+}
+
 mainCanvas.addEventListener('mousedown', mouseWins);
 mainCanvas.addEventListener('touchstart', touchWins);
+window.addEventListener("resize", windowResizeHandler);
 rebuildDrawCanvas(mainCanvas.width, mainCanvas.height);
