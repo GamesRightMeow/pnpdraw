@@ -15,22 +15,25 @@
       <div class="toolbar">
         <div class="toolbar-upper">
           <input id="gamesheet" class="nav-button gamesheet" type="file">  
-          <button class="nav-button" onclick="document.getElementById('gamesheet').click();">
+          <button class="nav-button" tile="Load new game sheet." onclick="document.getElementById('gamesheet').click();">
             <i class="fa-solid fa-image fa-xl"></i>
           </button>
-          <button id="drawErase" class="nav-button">
+          <button id="drawErase" class="nav-button" title="Toggle pen/eraser.">
             <i id="eraseIcon" class="fa-solid fa-eraser fa-xl"></i>
             <i id="drawIcon" class="fa-solid fa-pencil fa-xl"></i>
           </button>
-          <button id="fullscreen" class="nav-button">
+          <button id="fullscreen" class="nav-button" title="Toggle fullscreen.">
             <i class="fa-solid fa-maximize fa-xl"></i>
           </button>
-          <button id="rollDice" class="nav-button">
+          <button id="rollDice" class="nav-button" title="Roll a new d6.">
             <i class="fa-solid fa-dice fa-xl"></i>
           </button>
-          <button id="clearDice" class="nav-button">
+          <button id="clearDice" class="nav-button" title="Clear all dice.">
             <i class="fa-solid fa-xmark fa-xl"></i>
             <i class="fa-solid fa-dice fa-xl"></i>
+          </button>
+          <button class="nav-button" title="Open documentation." onclick="window.open('https://github.com/GamesRightMeow/pnpdraw');">
+            <i class="fa-solid fa-circle-question fa-xl"></i>
           </button>
         </div>
 
