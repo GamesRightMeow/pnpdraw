@@ -23,16 +23,21 @@ fullscreenButton.addEventListener("click", (e) => {
   }
 });
 
-let drawButton = document.getElementById('draw-button');
+let drawButton = document.getElementById('draw');
+drawButton.style.display = "none";
 drawButton.addEventListener("click", (e) => { 
   drawContext.strokeStyle = "rgba(0, 0, 0, 1)";
   drawContext.globalCompositeOperation='source-over';
+  eraseButton.style.display = "inline";
+  drawButton.style.display = "none";
 });
 
-let eraseButton = document.getElementById('erase-button');
+let eraseButton = document.getElementById('erase');
 eraseButton.addEventListener("click", (e) => { 
   drawContext.strokeStyle = "rgba(1, 1, 1, 0.5)";
   drawContext.globalCompositeOperation='destination-out';
+  eraseButton.style.display = "none";
+  drawButton.style.display = "inline";
 });
 
 let zoomSlider = document.getElementById("zoom");
@@ -57,28 +62,31 @@ drawCanvas.width = mainCanvas.width;
 drawCanvas.height = mainCanvas.height;
 let drawContext = drawCanvas.getContext("2d");
 
-let userImg = new Image;
-let imageInput = document.getElementById('userImage');
+let gamesheetImg = new Image;
+let imageInput = document.getElementById('gamesheet');
 imageInput.onchange = (e) => {
-  userImg.onload = function() {
-    drawCanvas = document.createElement('canvas');
-    drawCanvas.width = userImg.width;
-    drawCanvas.height = userImg.height;
-    drawContext = drawCanvas.getContext("2d");
+  gamesheetImg.onload = function() {
+    rebuildDrawCanvas(gamesheetImg.width, gamesheetImg.height);
     redraw()
   }
-  userImg.src = URL.createObjectURL(e.target.files[0]);
+  gamesheetImg.src = URL.createObjectURL(e.target.files[0]);
 };
 
-drawContext.lineJoin = "round";
-drawContext.lineWidth = 2;
-drawContext.strokeStyle = "rgba(0, 0, 0, 1)";
-
 function rebuildMainCanvas() {
-  mainCanvas = document.getElementById('sheet');
+  mainCanvas = document.getElementById('mainCanvas');
   mainCanvas.width = document.body.clientWidth;
   mainCanvas.height = document.body.clientHeight;
   mainContext = mainCanvas.getContext("2d");
+}
+
+function rebuildDrawCanvas(width, height) {
+  drawCanvas = document.createElement('canvas');
+  drawCanvas.width = width;
+  drawCanvas.height = height;
+  drawContext = drawCanvas.getContext("2d");
+  drawContext.lineJoin = "round";
+  drawContext.strokeStyle = "rgba(0, 0, 0, 1)";
+  drawContext.lineWidth = (sizeSlider.value / 100) * 48 + 2;
 }
 
 /**
@@ -97,7 +105,7 @@ function redraw() {
 
   let x = (mainCanvas.width / scale - drawCanvas.width) / 2;
   let y = (mainCanvas.height / scale - drawCanvas.height) / 2;
-  mainContext.drawImage(userImg, x, y);
+  mainContext.drawImage(gamesheetImg, x, y);
   mainContext.drawImage(drawCanvas, x, y);
 
   drawContext.setTransform(1, 0, 0, 1, 0, 0);
@@ -259,3 +267,4 @@ function touchWins(e) {
 
 mainCanvas.addEventListener('mousedown', mouseWins);
 mainCanvas.addEventListener('touchstart', touchWins);
+rebuildDrawCanvas(mainCanvas.width, mainCanvas.height);

@@ -8,21 +8,47 @@ body {
   overflow-y: hidden;
   overflow-x: hidden;
 }
-#container {
-  display: flex;
-}
-#sheet {
+.canvas {
   border: 2px solid black;
   width: 100%;
   height: 100%;
 }
-#toolbar {
+.toolbar {
+  background-color: #101419;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
-#userImage {
+.toolbar-upper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-shrink: 3;
+}
+.toolbar-lower {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 3;
+}
+.toolbar-lower i {
+  color: #D1D5DB;
+}
+.gamesheet {
   display: none;
 }
 .nav-button {
+  color: #F87171;
+  background-color: #101419;
+  border: 1px solid #D1D5DB;
   width: 50px;
   height: 50px;
+}
+.slider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
