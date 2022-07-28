@@ -1,5 +1,6 @@
 * {
   box-sizing: border-box;
+  font-family: 'Roboto', sans-serif;
 }
 body {
   margin: 0px;
@@ -16,9 +17,11 @@ body {
 .toolbar {
   background-color: #101419;
   display: flex;
+  gap: 4px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: 4px;
 }
 .toolbar-upper {
   display: flex;
@@ -43,12 +46,31 @@ body {
 .nav-button {
   color: #F87171;
   background-color: #101419;
-  border: 1px solid #D1D5DB;
-  width: 50px;
-  height: 50px;
+  border: 0px;
+  width: 40px;
+  height: 40px;
+}
+.nav-button:hover {
+  background-color: #1F2937;
 }
 .slider {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.dice-container {
+  display: flex;
+  gap: 8px;
+}
+.die {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #101419;
+  background-color: #D1D5DB;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  font-weight: 900;
+  font-size: large;
 }

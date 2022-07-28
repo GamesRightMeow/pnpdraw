@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link href="style.css" rel="stylesheet" type="text/css">
     <link href="fontawesome.css" rel="stylesheet" type="text/css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet"> 
   </head>
   <body>
     <div class="container">
@@ -14,16 +18,18 @@
           <button class="nav-button" onclick="document.getElementById('gamesheet').click();">
             <i class="fa-solid fa-image fa-xl"></i>
           </button>
-          <button id="draw" class="nav-button">
-            <i class="fa-solid fa-eraser fa-xl"></i>
-          </button>
-          <button id="erase" class="nav-button">
-            <i class="fa-solid fa-pencil fa-xl"></i>
+          <button id="drawErase" class="nav-button">
+            <i id="eraseIcon" class="fa-solid fa-eraser fa-xl"></i>
+            <i id="drawIcon" class="fa-solid fa-pencil fa-xl"></i>
           </button>
           <button id="fullscreen" class="nav-button">
             <i class="fa-solid fa-maximize fa-xl"></i>
           </button>
-          <button id="dice" class="nav-button">
+          <button id="rollDice" class="nav-button">
+            <i class="fa-solid fa-dice fa-xl"></i>
+          </button>
+          <button id="clearDice" class="nav-button">
+            <i class="fa-solid fa-xmark fa-xl"></i>
             <i class="fa-solid fa-dice fa-xl"></i>
           </button>
         </div>
@@ -38,8 +44,15 @@
             <input type="range" id="size" min="0" max="100">
           </div>
         </div>
-      </div>
 
+        <div id="diceContainer" class="dice-container">
+          <template id="dieTemplate">
+            <div class="die" id="dieValue">5</div>
+          </template>
+        </div>
+
+      </div>
+      
       <canvas id="mainCanvas" class="canvas"></canvas>  
     </div>
 

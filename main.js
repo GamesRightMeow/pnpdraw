@@ -7,6 +7,7 @@ let lastScaleDis = 0;
 let pinchMode = false;
 let pinchStart = 0;
 let pinchModeAccum = 0;
+let doDraw = true;
 
 let fullscreenButton = document.getElementById('fullscreen');
 fullscreenButton.addEventListener("click", (e) => { 
@@ -23,21 +24,41 @@ fullscreenButton.addEventListener("click", (e) => {
   }
 });
 
-let drawButton = document.getElementById('draw');
-drawButton.style.display = "none";
-drawButton.addEventListener("click", (e) => { 
-  drawContext.strokeStyle = "rgba(0, 0, 0, 1)";
-  drawContext.globalCompositeOperation='source-over';
-  eraseButton.style.display = "inline";
-  drawButton.style.display = "none";
+let drawEraseButton = document.getElementById('drawErase');
+let drawIcon = document.getElementById('drawIcon');
+let eraseIcon = document.getElementById('eraseIcon');
+eraseIcon.style.display = "none";
+drawEraseButton.addEventListener("click", (e) => { 
+  if (doDraw) {
+    drawContext.strokeStyle = "rgba(1, 1, 1, 0.5)";
+    drawContext.globalCompositeOperation='destination-out';
+    drawIcon.style.display = "none";
+    eraseIcon.style.display = "inline";
+    doDraw = false;
+  } else {
+    drawContext.strokeStyle = "rgba(0, 0, 0, 1)";
+    drawContext.globalCompositeOperation='source-over';
+    drawIcon.style.display = "inline";
+    eraseIcon.style.display = "none";
+    doDraw = true;
+  }
 });
 
-let eraseButton = document.getElementById('erase');
-eraseButton.addEventListener("click", (e) => { 
-  drawContext.strokeStyle = "rgba(1, 1, 1, 0.5)";
-  drawContext.globalCompositeOperation='destination-out';
-  eraseButton.style.display = "none";
-  drawButton.style.display = "inline";
+let rollDiceButton = document.getElementById('rollDice');
+rollDiceButton.addEventListener("click", (e) => { 
+  var temp = document.getElementById("dieTemplate");
+  var clone = temp.content.cloneNode(true);
+  clone.getElementById("dieValue").innerText = Math.round(Math.random() * 5) + 1;
+  let container = document.getElementById("diceContainer");
+  container.appendChild(clone);
+});
+
+let clearDiceButton = document.getElementById('clearDice');
+clearDiceButton.addEventListener("click", (e) => { 
+  let container = document.getElementById("diceContainer");
+  for (let i = container.children.length - 1; i > 0 ; i--) {
+    container.removeChild(container.children[i]);
+  }
 });
 
 let zoomSlider = document.getElementById("zoom");
