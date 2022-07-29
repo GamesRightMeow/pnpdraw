@@ -3,11 +3,9 @@ let pan = false;
 let panOffset = { x: 0, y: 0 };
 let lastPanPos = { x: 0, y: 0 };
 let scale = 1;
-let lastScaleDis = 0;
-let pinchMode = false;
-let pinchStart = 0;
-let pinchModeAccum = 0;
 let doDraw = true;
+let touches = [];
+let lastTouches = [];
 
 let fullscreenButton = document.getElementById('fullscreen');
 fullscreenButton.addEventListener("click", (e) => { 
@@ -83,6 +81,8 @@ drawCanvas.width = mainCanvas.width;
 drawCanvas.height = mainCanvas.height;
 let drawContext = drawCanvas.getContext("2d");
 
+let debug = document.getElementById("debug");
+
 let gamesheetImg = new Image;
 let imageInput = document.getElementById('gamesheet');
 imageInput.onchange = (e) => {
@@ -154,13 +154,18 @@ function mouseDownEventHandler(e) {
 
 function touchstartEventHandler(e) {
   paint = true;
-  pinchMode = 0;
-  pinchModeAccum = 0;
-  pinchStart = Date.now();
+
+  for (let i = 0; i < e.changedTouches.length; i++) {
+    touches.push({ 
+      id: e.changedTouches[i].identifier, 
+      x: e.changedTouches[i].pageX, 
+      y: e.changedTouches[i].pageY, 
+    });
+  }
 
   let x1 = e.touches[0].pageX - mainCanvas.offsetLeft;
   let y1 = e.touches[0].pageY - mainCanvas.offsetTop;
-
+  
   if (e.touches.length > 1) {
     let x2 = e.touches[1].pageX - mainCanvas.offsetLeft;
     let y2 = e.touches[1].pageY - mainCanvas.offsetTop;
@@ -168,7 +173,6 @@ function touchstartEventHandler(e) {
     let midY = (y1 + y2)/2;
     lastPanPos.x = midX;
     lastPanPos.y = midY;
-    lastScaleDis = Math.hypot(x2 - x1, y2 - y1);
   } else {
     let lx = (x1 / scale) - ((mainCanvas.width / scale - drawCanvas.width) / 2);
     let ly = (y1 / scale) - ((mainCanvas.height / scale - drawCanvas.height) / 2);
@@ -183,6 +187,14 @@ function touchEndEventHandler(e) {
   drawContext.closePath();
   paint = false;
   pan = false;
+
+  for (let j = 0; j < e.changedTouches.length; j++) {
+    for (let i = 0; i < touches.length; i++) {
+      if (touches[i].id == e.changedTouches[j].identifier) {
+        touches.splice(i, 1);
+      }
+    }
+  }
 }
 
 function mouseUpEventHandler(e) {
@@ -216,6 +228,16 @@ function mouseMoveEventHandler(e) {
 }
 
 function touchMoveEventHandler(e) {
+  for (let j = 0; j < e.changedTouches.length; j++) {
+    for (let i = 0; i < touches.length; i++) {
+      if (touches[i].id == e.changedTouches[j].identifier) {
+        touches[i].x = e.changedTouches[j].pageX;
+        touches[i].y = e.changedTouches[j].pageY;
+        break;
+      }
+    }
+  }
+
   let x1 = e.touches[0].pageX - mainCanvas.offsetLeft;
   let y1 = e.touches[0].pageY - mainCanvas.offsetTop;
   if (e.touches.length == 1) {
@@ -230,9 +252,9 @@ function touchMoveEventHandler(e) {
     let x2 = e.touches[1].pageX - mainCanvas.offsetLeft;
     let y2 = e.touches[1].pageY - mainCanvas.offsetTop;
     
+    // panning
     let midX = (x1 + x2)/2;
     let midY = (y1 + y2)/2;
-    let panDis = Math.hypot(midX - lastPanPos.x, midY - lastPanPos.y);
 
     let dx = midX - lastPanPos.x
     let dy = midY - lastPanPos.y
@@ -245,6 +267,52 @@ function touchMoveEventHandler(e) {
 
     redraw();
   }
+}
+
+function touchUpdateHandler() {
+  if (touches.length >= 2 && lastTouches.length >= 2) {
+    let touch1 = touches[0];
+    let lastTouch1 = lastTouches[0];
+    let touch2 = touches[1];
+    let lastTouch2 = lastTouches[1];
+
+    // zooming
+    let vx1 = touch1.x - lastTouch1.x;
+    let vy1 = touch1.y - lastTouch1.y;
+    let len1 = Math.sqrt(vx1 * vx1 + vy1 * vy1);
+    vx1 /= len1;
+    vy1 /= len1;
+
+    let vx2 = touch2.x - lastTouch2.x;
+    let vy2 = touch2.y - lastTouch2.y;
+    let len2 = Math.sqrt(vx2 * vx2 + vy2 * vy2);
+    vx2 /= len2;
+    vy2 /= len2;
+
+    let dot = vx1 * vx2 + vy1 * vy2;
+    if (dot <= 0) {
+      let dx = touch1.x - touch2.x;
+      let dy = touch1.y - touch2.y;
+      let distance = Math.sqrt(dx * dx + dy * dy);
+
+      let lastDx = lastTouch1.x - lastTouch2.x;
+      let lastDy = lastTouch1.y - lastTouch2.y;
+      let lastDistance = Math.sqrt(lastDx * lastDx + lastDy * lastDy);
+
+      let distanceDiff = distance - lastDistance;
+      scale = Math.min(1, Math.max(0.1, scale + distanceDiff * 0.002));
+    }
+  }
+
+  lastTouches = [];
+  for (let i = 0; i < touches.length; i++) {
+    lastTouches[i] = {};
+    lastTouches[i].id = touches[i].id;
+    lastTouches[i].x = touches[i].x;
+    lastTouches[i].y = touches[i].y;
+  }
+
+  window.requestAnimationFrame(touchUpdateHandler);
 }
 
 function mouseWheelEventHandler(e) {
@@ -282,6 +350,8 @@ function touchWins(e) {
   mainCanvas.addEventListener('touchstart', touchstartEventHandler);
   mainCanvas.addEventListener('touchmove', touchMoveEventHandler);
   mainCanvas.addEventListener('touchend', touchEndEventHandler);
+
+  window.requestAnimationFrame(touchUpdateHandler);
 
   touchstartEventHandler(e);
 }
