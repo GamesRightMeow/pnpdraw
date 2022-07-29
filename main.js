@@ -59,6 +59,21 @@ clearDiceButton.addEventListener("click", (e) => {
   }
 });
 
+let toolbarLower = document.getElementById("toolbarLower");
+toolbarLower.style.display = "none";
+
+let settingsButton = document.getElementById('settings');
+settingsButton.addEventListener("click", (e) => { 
+  if (toolbarLower.style.display == "none") {
+    toolbarLower.style.display = "inline";
+    panOffset.y -= toolbarLower.offsetHeight + 4;
+  } else {
+    panOffset.y += toolbarLower.offsetHeight + 4;
+    toolbarLower.style.display = "none";
+  }
+  redraw();
+});
+
 let zoomSlider = document.getElementById("zoom");
 zoomSlider.value = 100;
 zoomSlider.addEventListener("input", (e) => { 
