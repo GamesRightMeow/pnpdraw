@@ -8,6 +8,7 @@ let touches = [];
 let lastTouches = [];
 let historyIndex = 0;
 let history = [];
+let doPushHistory = false;
 
 let fullscreenButton = document.getElementById('fullscreen');
 fullscreenButton.addEventListener("click", (e) => { 
@@ -90,7 +91,7 @@ zoomSlider.addEventListener("input", (e) => {
 });
 
 let sizeSlider = document.getElementById("size");
-sizeSlider.value = 20;
+sizeSlider.value = 10;
 sizeSlider.addEventListener("input", (e) => { 
   drawContext.lineWidth = (sizeSlider.value / 100) * 48 + 2;
 });
@@ -130,7 +131,11 @@ function rebuildDrawCanvas(width, height) {
   drawContext = drawCanvas.getContext("2d");
   drawContext.lineJoin = "round";
   drawContext.strokeStyle = "rgba(0, 0, 0, 1)";
+  drawContext.lineWidth = 2;
+  drawContext.strokeRect(0, 0, width, height);
   drawContext.lineWidth = (sizeSlider.value / 100) * 48 + 2;
+  historyIndex = 0;
+  pushHistory(); // blank state
 }
 
 function pushHistory() {
@@ -148,8 +153,12 @@ function pushHistory() {
 function undo() {
   if (historyIndex - 1 >= 1) {
     historyIndex--;
+    drawContext.setTransform(1, 0, 0, 1, 0, 0);
     drawContext.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+    drawContext.lineWidth = 2;
+    drawContext.strokeRect(0, 0, drawCanvas.width, drawCanvas.height);
     drawContext.drawImage(history[historyIndex - 1], 0, 0);
+    drawContext.lineWidth = (sizeSlider.value / 100) * 48 + 2;
     redraw();
   }
 }
@@ -157,8 +166,12 @@ function undo() {
 function redo() {
   if (historyIndex + 1 <= history.length) {
     historyIndex++;
+    drawContext.setTransform(1, 0, 0, 1, 0, 0);
     drawContext.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+    drawContext.lineWidth = 2;
+    drawContext.strokeRect(0, 0, drawCanvas.width, drawCanvas.height);
     drawContext.drawImage(history[historyIndex - 1], 0, 0);
+    drawContext.lineWidth = (sizeSlider.value / 100) * 48 + 2;
     redraw();
   }
 }
@@ -198,6 +211,7 @@ function mouseDownEventHandler(e) {
     drawContext.moveTo(lx, ly);
     drawContext.stroke();
     redraw();
+    doPushHistory = true;
   } else if (e.buttons == 2) {
     pan = true;
     lastPanPos.x = x;
@@ -226,6 +240,7 @@ function touchstartEventHandler(e) {
     let midY = (y1 + y2)/2;
     lastPanPos.x = midX;
     lastPanPos.y = midY;
+    doPushHistory = false;
   } else {
     let lx = (x1 / scale) - ((mainCanvas.width / scale - drawCanvas.width) / 2);
     let ly = (y1 / scale) - ((mainCanvas.height / scale - drawCanvas.height) / 2);
@@ -233,6 +248,7 @@ function touchstartEventHandler(e) {
     drawContext.moveTo(lx, ly);
     drawContext.stroke();
     redraw();
+    doPushHistory = true;
   }
 }
 
@@ -249,8 +265,9 @@ function touchEndEventHandler(e) {
     }
   }
 
-  if (touches.length == 0) {
+  if (touches.length == 0 && doPushHistory) {
     pushHistory();
+    doPushHistory = false;
   }
 }
 
@@ -258,7 +275,11 @@ function mouseUpEventHandler(e) {
   drawContext.closePath();
   paint = false;
   pan = false;
-  pushHistory();
+
+  if (doPushHistory) {
+    pushHistory();
+    doPushHistory = false;
+  }
 }
 
 function mouseMoveEventHandler(e) {
@@ -419,8 +440,9 @@ function windowResizeHandler(e) {
   redraw();
 }
 
-mainCanvas.addEventListener('mousedown', mouseWins);
-mainCanvas.addEventListener('touchstart', touchWins);
-window.addEventListener("resize", windowResizeHandler);
-rebuildDrawCanvas(mainCanvas.width, mainCanvas.height);
-pushHistory() // blank state
+window.addEventListener("load", () => {
+  mainCanvas.addEventListener('mousedown', mouseWins);
+  mainCanvas.addEventListener('touchstart', touchWins);
+  window.addEventListener("resize", windowResizeHandler);
+  rebuildDrawCanvas(mainCanvas.width, mainCanvas.height);
+});
