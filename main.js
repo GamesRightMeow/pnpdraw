@@ -6,6 +6,8 @@ let scale = 1;
 let doDraw = true;
 let touches = [];
 let lastTouches = [];
+let historyIndex = 0;
+let history = [];
 
 let fullscreenButton = document.getElementById('fullscreen');
 fullscreenButton.addEventListener("click", (e) => { 
@@ -58,6 +60,12 @@ clearDiceButton.addEventListener("click", (e) => {
     container.removeChild(container.children[i]);
   }
 });
+
+let undoButton = document.getElementById('undo');
+undoButton.addEventListener("click", (e) => undo());
+
+let redoButton = document.getElementById('redo');
+redoButton.addEventListener("click", (e) => redo());
 
 let toolbarLower = document.getElementById("toolbarLower");
 toolbarLower.style.display = "none";
@@ -123,6 +131,36 @@ function rebuildDrawCanvas(width, height) {
   drawContext.lineJoin = "round";
   drawContext.strokeStyle = "rgba(0, 0, 0, 1)";
   drawContext.lineWidth = (sizeSlider.value / 100) * 48 + 2;
+}
+
+function pushHistory() {
+  if (historyIndex != history.length) {
+    history.splice(historyIndex)
+  }
+
+  let img = new Image();
+  img.src = drawCanvas.toDataURL();
+  history.push(img);
+
+  historyIndex++;
+}
+
+function undo() {
+  if (historyIndex - 1 >= 1) {
+    historyIndex--;
+    drawContext.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+    drawContext.drawImage(history[historyIndex - 1], 0, 0);
+    redraw();
+  }
+}
+
+function redo() {
+  if (historyIndex + 1 <= history.length) {
+    historyIndex++;
+    drawContext.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+    drawContext.drawImage(history[historyIndex - 1], 0, 0);
+    redraw();
+  }
 }
 
 /**
@@ -210,12 +248,17 @@ function touchEndEventHandler(e) {
       }
     }
   }
+
+  if (touches.length == 0) {
+    pushHistory();
+  }
 }
 
 function mouseUpEventHandler(e) {
   drawContext.closePath();
   paint = false;
   pan = false;
+  pushHistory();
 }
 
 function mouseMoveEventHandler(e) {
@@ -380,3 +423,4 @@ mainCanvas.addEventListener('mousedown', mouseWins);
 mainCanvas.addEventListener('touchstart', touchWins);
 window.addEventListener("resize", windowResizeHandler);
 rebuildDrawCanvas(mainCanvas.width, mainCanvas.height);
+pushHistory() // blank state
