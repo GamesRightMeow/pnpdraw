@@ -440,9 +440,15 @@ function windowResizeHandler(e) {
   redraw();
 }
 
+function blurHandler(e) {
+  touches = [];
+  lastTouches = [];
+}
+
 window.addEventListener("load", () => {
   mainCanvas.addEventListener('mousedown', mouseWins);
   mainCanvas.addEventListener('touchstart', touchWins);
   window.addEventListener("resize", windowResizeHandler);
+  window.addEventListener("blur", blurHandler);
   rebuildDrawCanvas(mainCanvas.width, mainCanvas.height);
 });
