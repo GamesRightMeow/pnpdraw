@@ -9,6 +9,7 @@ let lastTouches = [];
 let historyIndex = 0;
 let history = [];
 let doPushHistory = false;
+let lastTouchTime = 0;
 
 let fullscreenButton = document.getElementById('fullscreen');
 fullscreenButton.addEventListener("click", (e) => { 
@@ -273,21 +274,14 @@ function touchEndEventHandler(e) {
     }
   }
 
-  if (touches.length == 0 && doPushHistory) {
-    pushHistory();
-    doPushHistory = false;
-  }
+  lastTouchTime = Date.now();
 }
 
 function mouseUpEventHandler(e) {
   drawContext.closePath();
   paint = false;
   pan = false;
-
-  if (doPushHistory) {
-    pushHistory();
-    doPushHistory = false;
-  }
+  pushHistory();
 }
 
 function mouseMoveEventHandler(e) {
@@ -397,6 +391,11 @@ function touchUpdateHandler() {
     lastTouches[i].id = touches[i].id;
     lastTouches[i].x = touches[i].x;
     lastTouches[i].y = touches[i].y;
+  }
+
+  if (touches.length == 0 && doPushHistory && Date.now() - lastTouchTime > 100) {
+    pushHistory();
+    doPushHistory = false;
   }
 
   window.requestAnimationFrame(touchUpdateHandler);
