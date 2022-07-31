@@ -153,12 +153,16 @@ function pushHistory() {
 function undo() {
   if (historyIndex - 1 >= 1) {
     historyIndex--;
+    drawContext.globalCompositeOperation='source-over';
     drawContext.setTransform(1, 0, 0, 1, 0, 0);
     drawContext.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
     drawContext.lineWidth = 2;
     drawContext.strokeRect(0, 0, drawCanvas.width, drawCanvas.height);
     drawContext.drawImage(history[historyIndex - 1], 0, 0);
     drawContext.lineWidth = (sizeSlider.value / 100) * 48 + 2;
+    if (!doDraw) {
+      drawContext.globalCompositeOperation='destination-out';
+    }
     redraw();
   }
 }
@@ -166,12 +170,16 @@ function undo() {
 function redo() {
   if (historyIndex + 1 <= history.length) {
     historyIndex++;
+    drawContext.globalCompositeOperation='source-over';
     drawContext.setTransform(1, 0, 0, 1, 0, 0);
     drawContext.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
     drawContext.lineWidth = 2;
     drawContext.strokeRect(0, 0, drawCanvas.width, drawCanvas.height);
     drawContext.drawImage(history[historyIndex - 1], 0, 0);
     drawContext.lineWidth = (sizeSlider.value / 100) * 48 + 2;
+    if (!doDraw) {
+      drawContext.globalCompositeOperation='destination-out';
+    }
     redraw();
   }
 }
