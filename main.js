@@ -436,6 +436,7 @@ function touchWins(e) {
   mainCanvas.addEventListener('touchstart', touchstartEventHandler);
   mainCanvas.addEventListener('touchmove', touchMoveEventHandler);
   mainCanvas.addEventListener('touchend', touchEndEventHandler);
+  mainCanvas.addEventListener('touchcancel', touchEndEventHandler);
 
   window.requestAnimationFrame(touchUpdateHandler);
 
