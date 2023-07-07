@@ -415,7 +415,7 @@ function touchUpdateHandler() {
 
 function mouseWheelEventHandler(e) {
   let dir = Math.sign(e.wheelDelta);
-  scale = Math.min(1, Math.max(0.1, scale + dir * 0.01));
+  scale = Math.min(1, Math.max(0.1, scale + dir * 0.03));
   zoomSlider.value = 100 * scale;
   redraw();
 }
