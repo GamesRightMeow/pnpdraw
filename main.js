@@ -31,36 +31,17 @@ let drawIcon = document.getElementById('drawIcon');
 let eraseIcon = document.getElementById('eraseIcon');
 eraseIcon.style.display = "none";
 drawEraseButton.addEventListener("click", (e) => { 
-  if (doDraw) {
-    drawContext.strokeStyle = "rgba(1, 1, 1, 0.5)";
-    drawContext.globalCompositeOperation='destination-out';
-    drawIcon.style.display = "none";
-    eraseIcon.style.display = "inline";
-    doDraw = false;
-  } else {
-    drawContext.strokeStyle = "rgba(0, 0, 0, 1)";
-    drawContext.globalCompositeOperation='source-over';
-    drawIcon.style.display = "inline";
-    eraseIcon.style.display = "none";
-    doDraw = true;
-  }
+  switchTool();
 });
 
 let rollDiceButton = document.getElementById('rollDice');
 rollDiceButton.addEventListener("click", (e) => { 
-  var temp = document.getElementById("dieTemplate");
-  var clone = temp.content.cloneNode(true);
-  clone.getElementById("dieValue").innerText = Math.round(Math.random() * 5) + 1;
-  let container = document.getElementById("diceContainer");
-  container.appendChild(clone);
+  rollDice();
 });
 
 let clearDiceButton = document.getElementById('clearDice');
 clearDiceButton.addEventListener("click", (e) => { 
-  let container = document.getElementById("diceContainer");
-  for (let i = container.children.length - 1; i > 0 ; i--) {
-    container.removeChild(container.children[i]);
-  }
+  clearDice();
 });
 
 let undoButton = document.getElementById('undo');
@@ -117,6 +98,37 @@ imageInput.onchange = (e) => {
   }
   gamesheetImg.src = URL.createObjectURL(e.target.files[0]);
 };
+
+function clearDice() {
+  let container = document.getElementById("diceContainer");
+  for (let i = container.children.length - 1; i > 0 ; i--) {
+    container.removeChild(container.children[i]);
+  }
+}
+
+function rollDice() {
+  var temp = document.getElementById("dieTemplate");
+  var clone = temp.content.cloneNode(true);
+  clone.getElementById("dieValue").innerText = Math.round(Math.random() * 5) + 1;
+  let container = document.getElementById("diceContainer");
+  container.appendChild(clone);
+}
+
+function switchTool() {
+  if (doDraw) {
+    drawContext.strokeStyle = "rgba(1, 1, 1, 0.5)";
+    drawContext.globalCompositeOperation='destination-out';
+    drawIcon.style.display = "none";
+    eraseIcon.style.display = "inline";
+    doDraw = false;
+  } else {
+    drawContext.strokeStyle = "rgba(0, 0, 0, 1)";
+    drawContext.globalCompositeOperation='source-over';
+    drawIcon.style.display = "inline";
+    eraseIcon.style.display = "none";
+    doDraw = true;
+  }
+}
 
 function rebuildMainCanvas() {
   mainCanvas = document.getElementById('mainCanvas');
@@ -453,10 +465,30 @@ function blurHandler(e) {
   lastTouches = [];
 }
 
+function keyDownHandler(e) {
+  switch (e.key) {
+    case "e":
+      switchTool();
+      break;
+    case "r":
+      rollDice();
+      break;
+    case "R":
+      clearDice();
+      break;
+    case "z":
+      if (e.getModifierState("Control")) {
+        undo();
+      }
+      break;
+  }
+}
+
 window.addEventListener("load", () => {
   mainCanvas.addEventListener('mousedown', mouseWins);
   mainCanvas.addEventListener('touchstart', touchWins);
   window.addEventListener("resize", windowResizeHandler);
   window.addEventListener("blur", blurHandler);
+  window.addEventListener("keydown", keyDownHandler);
   rebuildDrawCanvas(mainCanvas.width, mainCanvas.height);
 });
