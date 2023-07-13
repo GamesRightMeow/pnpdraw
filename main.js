@@ -316,7 +316,11 @@ function mouseUpEventHandler(e) {
   drawContext.closePath();
   paint = false;
   pan = false;
-  pushHistory();
+
+  // only push for left click/draw events
+  if (e.button == 0) {
+    pushHistory();
+  }
 }
 
 function mouseMoveEventHandler(e) {
