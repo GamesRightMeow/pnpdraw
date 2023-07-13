@@ -11,6 +11,29 @@ let history = [];
 let doPushHistory = false;
 let lastTouchTime = 0;
 
+let downloadButton = document.getElementById('download');
+downloadButton.addEventListener("click", (e) => { 
+  let oldScale = scale;
+  let oldWidth = mainCanvas.width;
+  let oldHeight = mainCanvas.height;
+
+  scale = 1;
+  mainCanvas.width = 4096;
+  mainCanvas.height = 4096;
+  redraw();
+
+  const link = document.createElement('a');
+  link.download = 'download.png';
+  link.href = mainCanvas.toDataURL();
+  link.click();
+  link.delete;
+
+  scale = oldScale;
+  mainCanvas.width = oldWidth;
+  mainCanvas.height = oldHeight;
+  redraw();
+});
+
 let fullscreenButton = document.getElementById('fullscreen');
 fullscreenButton.addEventListener("click", (e) => { 
   if (document.fullscreenElement) {
